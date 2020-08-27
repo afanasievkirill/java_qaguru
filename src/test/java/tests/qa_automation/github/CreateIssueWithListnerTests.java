@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.equalTo;
 @Feature("Создание задачи")
 @Story("Использование листнеров")
 @Owner("afanasievkirill")
-public class CreateIssueWithListner extends BaseTest{
+public class CreateIssueWithListnerTests extends BaseTest {
 
     @DisplayName("Создание задачи и проверка через АПИ с использованием Листнеров")
     @ParameterizedTest
@@ -31,28 +31,33 @@ public class CreateIssueWithListner extends BaseTest{
     public void createIssueWithListner(String LOGIN, String PASSWORD, String REPOSITORY, String TOKEN) {
         parameter("Репозиторий", REPOSITORY);
         parameter("Пользователь", LOGIN);
+        
         open("https://github.com/");
-        $x("//*[@class='HeaderMenu-link no-underline mr-3']").shouldBe(visible).click();
-        $(byName("login")).shouldBe(visible).setValue(LOGIN);
-        $(byName("password")).shouldBe(visible).setValue(PASSWORD).pressEnter();
+        
+        $x("//*[@class='HeaderMenu-link no-underline mr-3']").click(); // maybe a better locator?
+        $(byName("login")).setValue(LOGIN);
+        $(byName("password")).setValue(PASSWORD).pressEnter();
+        
+        // todo make assert that you are logged in
+        
         $(".header-search-input").click();
         $(".header-search-input").sendKeys(REPOSITORY);
         $(".header-search-input").submit();
         $(By.linkText(REPOSITORY)).click();
-        $x("//*[@data-content='Issues']").shouldBe(visible).click();
-        $x("//*[@class='btn btn-primary']/span").shouldBe(visible).click();
-        $(byId("issue_title")).shouldBe(visible).setValue(issueTitle);
-        $(byId("issue_body")).shouldBe(visible).setValue(issueBody);
-        $(byId("assignees-select-menu")).shouldBe(visible).click();
+        $(by("data-content", "Issues").click();
+        $(".btn.btn-primary span").click();
+        $("#issue_title").setValue(issueTitle);
+        $("#issue_body").setValue(issueBody);
+        $("#assignees-select-menu").click();
         // Нестабильный локатор
-        $(".js-username").shouldBe(visible).click();
-        $(byId("assignees-select-menu")).shouldBe(visible).click();
-        $(byText("Labels")).shouldBe(visible).click();
-        $(byText("bug")).shouldBe(visible).click();
-        $(byText("Labels")).shouldBe(visible).click();
-        $(byText("Submit new issue")).shouldBe(visible).click();
-        int issueNumber = Integer
-                .parseInt($(".js-issue-title").sibling(0).getText().replace("#", ""));
+        $(".js-username").click();
+        $("#assignees-select-menu").click();
+        $(byText("Labels")).click();
+        $(byText("bug")).click();
+        $(byText("Labels")).click();
+        $(byText("Submit new issue")).click();
+          
+        int issueNumber = Integer.parseInt($(".js-issue-title").sibling(0).getText().replace("#", ""));
         issue = given()
                 .filter(new AllureRestAssured())
                 .header("Authorization", "token " + TOKEN)
@@ -64,6 +69,7 @@ public class CreateIssueWithListner extends BaseTest{
                 .all()
                 .extract()
                 .as(Issue.class);
+        
         assertThat(issue.getNumber(), comparesEqualTo(issueNumber));
         assertThat(issue.getTitle(), equalTo(issueTitle));
         assertThat(issue.getBody(), equalTo(issueBody));
